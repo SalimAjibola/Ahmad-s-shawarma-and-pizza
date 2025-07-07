@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" x-data="shop()" x-init="$watch('cart', () => localStorage.setItem('cart', JSON.stringify(cart)))">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ahmad's Shawarma & Pizza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.20/dist/full.css" rel="stylesheet" />
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+
+  <body class="bg-[#fffdfb] text-gray-800" x-data="shop()">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+      <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+        <div class="flex items-center gap-2">
+          <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=red&shade=600" alt="Ahmad's Logo" />
+          <span class="text-lg font-bold text-red-700">Ahmad's Shawarma</span>
+        </div>
+        <div class="hidden lg:flex lg:gap-x-12">
+          <a href="#home" class="text-sm font-semibold text-gray-900 hover:text-red-600">Home</a>
+          <a href="#menu" class="text-sm font-semibold text-gray-900 hover:text-red-600">Menu</a>
+          <a href="#categories" class="text-sm font-semibold text-gray-900 hover:text-red-600">Categories</a>
+          <a href="#contact" class="text-sm font-semibold text-gray-900 hover:text-red-600">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Hero -->
+    <section id="home" class="text-center px-6 py-16">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-red-700">Welcome to Ahmad's Shawarma & Pizza</h1>
+      <p class="mt-4 text-gray-600 text-lg">Tasty, hot, and fast – just the way you love it.</p>
+    </section>
+
+    <!-- Category Buttons -->
+    <section id="categories" class="px-6 mb-6 text-center">
+      <div class="flex justify-center space-x-4 overflow-x-auto pb-2">
+        <button class="btn btn-outline btn-sm rounded-full" @click="filterCategory('Pizza')">🍕 Pizza</button>
+        <button class="btn btn-outline btn-sm rounded-full" @click="filterCategory('Shawarma')">🌯 Shawarma</button>
+        <button class="btn btn-outline btn-sm rounded-full" @click="filterCategory('Drinks')">🥤 Drinks</button>
+        <button class="btn btn-outline btn-sm rounded-full" @click="filterCategory('Combos')">🥩 Combos</button>
+        <button class="btn btn-outline btn-sm rounded-full" @click="filterCategory('Hot Deals')">🔥 Hot Deals</button>
+      </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <template x-for="(item, index) in filteredItems" :key="index">
+        <div class="card bg-white shadow-md">
+          <figure>
+            <img :src="item.image" :alt="item.name" class="h-48 w-full object-cover" />
+          </figure>
+          <div class="card-body">
+            <h2 class="card-title text-lg text-red-700" x-text="item.name"></h2>
+            <p class="text-gray-600">Freshly prepared and served hot.</p>
+            <p class="font-semibold text-black">₦<span x-text="item.price"></span></p>
+            <div class="flex items-center space-x-2">
+              <input type="number" min="1" value="1" class="input input-bordered w-20 bg-white text-black" x-model.number="item.qty" />
+              <button class="btn btn-error text-white" @click="addToCart(index)">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <!-- Floating Cart -->
+    <div class="fixed bottom-6 right-6 z-50" x-cloak>
+      <div class="relative">
+        <button class="btn btn-circle btn-neutral shadow-lg" @click="toggleCart = !toggleCart">
+          🛒
+          <span class="badge badge-sm badge-primary absolute -top-2 -right-2" x-text="cart.length"></span>
+        </button>
+        <div class="absolute bottom-16 right-0 bg-white shadow-xl w-80 max-h-[60vh] overflow-y-auto rounded-lg p-4 space-y-3" x-show="toggleCart">
+          <h3 class="font-bold text-lg">Cart</h3>
+          <template x-for="(item, index) in cart" :key="index">
+            <div class="flex justify-between items-center border-b pb-2">
+              <div>
+                <p class="text-sm font-medium" x-text="item.name"></p>
+                <p class="text-xs text-gray-500">₦<span x-text="item.price"></span> x <span x-text="item.qty"></span></p>
+              </div>
+              <button class="text-red-600 text-xs" @click="removeFromCart(index)">Remove</button>
+            </div>
+          </template>
+          <div class="font-semibold text-right">Total: ₦<span x-text="total"></span></div>
+          <a href="checkout.html" class="btn btn-error w-full text-white">Checkout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-neutral text-neutral-content grid-cols-2 md:grid-cols-3 lg:grid-cols-6 p-10">
+      <nav>
+        <h6 class="footer-title">Services</h6>
+        <a href="#" class="link link-hover">Delivery</a>
+        <a href="#" class="link link-hover">Ordering</a>
+        <a href="#" class="link link-hover">Custom Orders</a>
+        <a href="#" class="link link-hover">Gift Cards</a>
+      </nav>
+      <nav>
+        <h6 class="footer-title">Company</h6>
+        <a href="#" class="link link-hover">About Us</a>
+        <a href="#" class="link link-hover">Contact</a>
+        <a href="#" class="link link-hover">Careers</a>
+        <a href="#" class="link link-hover">Blog</a>
+      </nav>
+      <nav>
+        <h6 class="footer-title">Legal</h6>
+        <a href="#" class="link link-hover">Terms</a>
+        <a href="#" class="link link-hover">Privacy</a>
+        <a href="#" class="link link-hover">Cookies</a>
+      </nav>
+      <nav>
+        <h6 class="footer-title">Social</h6>
+        <a href="#" class="link link-hover">Instagram</a>
+        <a href="#" class="link link-hover">Twitter</a>
+        <a href="#" class="link link-hover">Facebook</a>
+        <a href="#" class="link link-hover">TikTok</a>
+      </nav>
+      <nav>
+        <h6 class="footer-title">Explore</h6>
+        <a href="#" class="link link-hover">Rewards</a>
+        <a href="#" class="link link-hover">Special Offers</a>
+        <a href="#" class="link link-hover">Locations</a>
+      </nav>
+      <nav>
+        <h6 class="footer-title">Apps</h6>
+        <a href="#" class="link link-hover">iPhone</a>
+        <a href="#" class="link link-hover">Android</a>
+        <a href="#" class="link link-hover">Mac</a>
+      </nav>
+    </footer>
+
+    <!-- Alpine Store -->
+    <script>
+      function shop() {
+        return {
+          toggleCart: false,
+          cart: [],
+          selectedCategory: 'All',
+          menuItems: [
+            { name: 'Chicken Shawarma', price: 2500, image: 'https://images.unsplash.com/photo-1662116765994-1e4200c43589?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', qty: 1, category: 'Shawarma' },
+            { name: 'Pepperoni Pizza', price: 4000, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=580&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', qty: 1, category: 'Pizza' },
+            { name: 'Combo Shawarma', price: 3500, image: 'https://images.unsplash.com/photo-1699728088600-6d684acbeada?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', qty: 1, category: 'Combos' },
+            { name: 'Coca Cola (50cl)', price: 500, image: 'https://images.unsplash.com/photo-1667204651371-5d4a65b8b5a9?q=80&w=416&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', qty: 1, category: 'Drinks' },
+            { name: 'Cheese Pizza', price: 4500, image: 'https://images.unsplash.com/photo-1520201163981-8cc95007dd2a?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', qty: 1, category: 'Pizza' },
+            { name: 'Beef Shawarma', price: 3000, image: 'https://images.unsplash.com/photo-1638537125835-82acb38d3531?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', qty: 1, category: 'Shawarma' },
+          ],
+          get filteredItems() {
+            if (this.selectedCategory === 'All') return this.menuItems;
+            return this.menuItems.filter(i => i.category === this.selectedCategory);
+          },
+          filterCategory(cat) {
+            this.selectedCategory = cat;
+          },
+          addToCart(index) {
+            const item = this.filteredItems[index];
+            this.cart.push({ ...item });
+          },
+          removeFromCart(index) {
+            this.cart.splice(index, 1);
+          },
+          get total() {
+            return this.cart.reduce((t, i) => t + i.price * i.qty, 0);
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" x-data="checkout()" x-init="init()">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout | Ahmad’s Shawarma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.20/dist/full.css" rel="stylesheet" />
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body class="bg-[url('https://images.unsplash.com/photo-1606788075761-c3b8f227d25d')] bg-cover bg-center text-gray-800">
+
+    <!-- Login Modal -->
+    <div
+      class="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+      x-show="!loggedIn"
+      x-transition
+    >
+      <div class="bg-white/30 backdrop-blur-xl p-8 rounded-xl shadow-lg w-[90%] max-w-sm space-y-4 text-center">
+        <h2 class="text-2xl font-bold text-red-700">Login to Place Your Order</h2>
+        <input
+          type="text"
+          placeholder="Enter your phone or email"
+          class="input input-bordered w-full"
+          x-model="loginInput"
+        />
+        <button class="btn btn-error w-full text-white" @click="login()">Login</button>
+      </div>
+    </div>
+
+    <!-- Checkout Content -->
+    <main
+      class="min-h-screen px-6 py-12 flex flex-col items-center justify-center backdrop-blur-lg bg-white/30"
+      x-show="loggedIn"
+      x-transition
+    >
+      <div class="max-w-4xl w-full bg-white/60 backdrop-blur-lg p-8 rounded-lg shadow-xl space-y-10">
+        <h1 class="text-3xl font-bold text-center text-red-600">Checkout</h1>
+
+        <div class="grid md:grid-cols-2 gap-10">
+          <!-- Cart Summary -->
+          <section>
+            <h2 class="text-xl font-semibold mb-4">Your Order</h2>
+            <template x-if="cart.length === 0">
+              <p class="text-gray-600">Your cart is empty.</p>
+            </template>
+            <ul class="space-y-4">
+              <template x-for="(item, index) in cart" :key="index">
+                <li class="flex justify-between items-center border-b pb-2">
+                  <div>
+                    <p class="font-medium" x-text="item.name"></p>
+                    <p class="text-sm text-gray-500">₦<span x-text="item.price"></span> x <span x-text="item.qty"></span></p>
+                  </div>
+                  <p class="font-semibold">₦<span x-text="item.price * item.qty"></span></p>
+                </li>
+              </template>
+            </ul>
+            <div class="mt-6 text-right font-bold text-lg">
+              Total: ₦<span x-text="total"></span>
+            </div>
+          </section>
+
+          <!-- Delivery Form -->
+          <section>
+            <h2 class="text-xl font-semibold mb-4">Delivery Info</h2>
+            <form @submit.prevent="placeOrder" class="space-y-4">
+              <input type="text" placeholder="Full Name" class="input input-bordered w-full" x-model="name" required />
+              <input type="tel" placeholder="Phone Number" class="input input-bordered w-full" x-model="phone" required />
+              <input type="text" placeholder="Delivery Address" class="input input-bordered w-full" x-model="address" required />
+              <textarea placeholder="Additional Note (Optional)" class="textarea textarea-bordered w-full" x-model="note"></textarea>
+              <button type="submit" class="btn btn-error w-full text-white">Place Order</button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Alpine Logic -->
+    <script>
+      function checkout() {
+        return {
+          loggedIn: false,
+          loginInput: '',
+          cart: [],
+          name: '',
+          phone: '',
+          address: '',
+          note: '',
+          init() {
+            this.loggedIn = localStorage.getItem('loggedIn') === 'true';
+            const stored = localStorage.getItem('cart');
+            this.cart = stored ? JSON.parse(stored) : [];
+          },
+          login() {
+            if (this.loginInput.length < 3) {
+              alert('Enter a valid input.');
+              return;
+            }
+            this.loggedIn = true;
+            localStorage.setItem('loggedIn', 'true');
+          },
+          get total() {
+            return this.cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+          },
+          placeOrder() {
+            if (!this.name || !this.phone || !this.address) {
+              alert('Please fill out all required fields.');
+              return;
+            }
+
+            alert(`🎉 Order placed successfully!\nThank you, ${this.name}`);
+
+            localStorage.removeItem('cart');
+            this.cart = [];
+            this.name = this.phone = this.address = this.note = '';
+            window.location.href = 'index.html';
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
